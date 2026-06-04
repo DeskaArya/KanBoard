@@ -40,12 +40,33 @@ npm install
 
 ### 3. Configure Environment Variables
 
-Create a file named `.env` in the root directory of the project and add your Supabase credentials:
+Create a file named `.env` in the root directory of the project and add your database credentials. 
+
+#### Option A: Using Supabase (Default)
+
+If you are using Supabase, add the following variables:
 
 ```env
 PUBLIC_SUPABASE_URL=https://your-supabase-project.supabase.co
 PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-key
 ```
+
+#### Option B: Alternative Databases (PostgreSQL / MySQL)
+
+If you decide to migrate or use an alternative database connection (e.g. via a custom server or adapter like Prisma/Drizzle), configure your connection string as follows:
+
+For PostgreSQL:
+```env
+DATABASE_URL=postgresql://db_user:db_password@localhost:5432/kanboard_db?schema=public
+```
+
+For MySQL:
+```env
+DATABASE_URL=mysql://db_user:db_password@localhost:3306/kanboard_db
+```
+
+> [!NOTE]
+> The application is currently pre-configured to use the `@supabase/supabase-js` client. Switching to standard PostgreSQL or MySQL databases requires updating the database client initialization and authentication handling in the source code.
 
 ### 4. Database Schema (Supabase SQL)
 
