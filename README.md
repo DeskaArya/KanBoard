@@ -1,58 +1,58 @@
 # KanBoard
 
-KanBoard adalah aplikasi manajemen proyek visual berbasis papan Kanban yang dibangun menggunakan SvelteKit dan Supabase. Aplikasi ini memungkinkan pengguna untuk membuat papan, kolom, dan kartu tugas guna memvisualisasikan alur kerja secara teratur, lengkap dengan dukungan prioritas, tanggal jatuh tempo, dan integrasi catatan (notes).
+KanBoard is a visual project management application based on the Kanban board layout, built using SvelteKit and Supabase. This application allows users to create boards, columns, and task cards to visualize workflows efficiently, complete with support for priority levels, due dates, and notes integration.
 
-## Fitur Utama
+## Key Features
 
-- Manajemen Papan Kanban: Membuat dan mengelola beberapa papan proyek dengan latar belakang gradien yang dinamis.
-- Kolom dan Kartu Kustom: Menambahkan kolom alur kerja (seperti Todo, In Progress, Done) dan menaruh kartu tugas di dalamnya.
-- Detail Tugas Lanjutan: Mengatur tingkat prioritas (low, medium, high), menambahkan deskripsi, menyertakan tautan referensi, serta menetapkan tanggal jatuh tempo.
-- Sistem Catatan Terintegrasi: Membuat catatan berbasis Markdown dan menandai catatan favorit untuk akses cepat.
-- Manajemen Autentikasi dan Profil: Pendaftaran dan login pengguna aman yang dikelola melalui Supabase Auth, serta pengaturan peran pengguna (user/admin).
+- Kanban Board Management: Create and manage multiple project boards with dynamic gradient backgrounds.
+- Custom Columns and Cards: Add workflow columns (such as Todo, In Progress, Done) and place task cards inside them.
+- Advanced Task Details: Set priority levels (low, medium, high), add descriptions, include reference links, and set due dates.
+- Integrated Notes System: Create Markdown-based notes and mark favorite notes for quick access.
+- Authentication and Profile Management: Secure user registration and login managed via Supabase Auth, along with user role management (user/admin).
 
-## Teknologi yang Digunakan
+## Tech Stack
 
 - Frontend Framework: SvelteKit (Svelte 5)
 - Styling: Tailwind CSS
 - Database & Auth: Supabase
 - Icons: Lucide Svelte
-- Parser Markdown: Marked
+- Markdown Parser: Marked
 
-## Persyaratan Sistem
+## Prerequisites
 
-- Node.js versi 18 atau lebih baru
-- Akun Supabase (untuk database dan autentikasi)
+- Node.js version 18 or later
+- Supabase account (for database and authentication)
 
-## Langkah Setup
+## Setup Guide
 
-### 1. Klon Repositori
+### 1. Clone the Repository
 
 ```sh
 git clone https://github.com/DeskaArya/KanBoard.git
 cd KanBoard
 ```
 
-### 2. Instal Dependensi
+### 2. Install Dependencies
 
 ```sh
 npm install
 ```
 
-### 3. Konfigurasi Variabel Lingkungan (Environment Variables)
+### 3. Configure Environment Variables
 
-Buat file bernama `.env` di direktori utama proyek dan tambahkan kredensial Supabase Anda:
+Create a file named `.env` in the root directory of the project and add your Supabase credentials:
 
 ```env
 PUBLIC_SUPABASE_URL=https://your-supabase-project.supabase.co
 PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-key
 ```
 
-### 4. Skema Database (Supabase SQL)
+### 4. Database Schema (Supabase SQL)
 
-Jalankan perintah SQL berikut di SQL Editor Supabase Anda untuk membuat tabel-tabel yang diperlukan:
+Run the following SQL commands in your Supabase SQL Editor to create the necessary tables:
 
 ```sql
--- Tabel Profil Pengguna
+-- User Profiles Table
 create table profiles (
   id uuid references auth.users on delete cascade primary key,
   username text unique not null,
@@ -62,7 +62,7 @@ create table profiles (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Tabel Board
+-- Boards Table
 create table boards (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references profiles(id) on delete cascade not null,
@@ -72,7 +72,7 @@ create table boards (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Tabel Column
+-- Columns Table
 create table columns (
   id uuid default gen_random_uuid() primary key,
   board_id uuid references boards(id) on delete cascade not null,
@@ -81,7 +81,7 @@ create table columns (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Tabel Card
+-- Cards Table
 create table cards (
   id uuid default gen_random_uuid() primary key,
   column_id uuid references columns(id) on delete cascade not null,
@@ -95,7 +95,7 @@ create table cards (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Tabel Note
+-- Notes Table
 create table notes (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references profiles(id) on delete cascade not null,
@@ -108,29 +108,29 @@ create table notes (
 );
 ```
 
-Pastikan juga untuk mengaktifkan Row Level Security (RLS) di Supabase atau mengatur kebijakan akses (policies) sesuai kebutuhan aplikasi Anda agar data pengguna aman.
+Make sure to enable Row Level Security (RLS) on Supabase or set appropriate access policies according to your application requirements to keep user data secure.
 
-## Menjalankan Proyek
+## Running the Project
 
-### Mode Pengembangan (Development)
+### Development Mode
 
-Untuk menjalankan server pengembangan lokal:
+To run the local development server:
 
 ```sh
 npm run dev
 ```
 
-Buka browser Anda dan akses `http://localhost:5173`.
+Open your browser and navigate to `http://localhost:5173`.
 
-### Membangun untuk Produksi (Production Build)
+### Build for Production
 
-Untuk membuat build produksi aplikasi:
+To create a production build of the application:
 
 ```sh
 npm run build
 ```
 
-Anda dapat menguji hasil build produksi secara lokal dengan perintah:
+You can test the production build locally with the following command:
 
 ```sh
 npm run preview
