@@ -1,42 +1,137 @@
-# sv
+# KanBoard
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+KanBoard adalah aplikasi manajemen proyek visual berbasis papan Kanban yang dibangun menggunakan SvelteKit dan Supabase. Aplikasi ini memungkinkan pengguna untuk membuat papan, kolom, dan kartu tugas guna memvisualisasikan alur kerja secara teratur, lengkap dengan dukungan prioritas, tanggal jatuh tempo, dan integrasi catatan (notes).
 
-## Creating a project
+## Fitur Utama
 
-If you're seeing this, you've probably already done this step. Congrats!
+- Manajemen Papan Kanban: Membuat dan mengelola beberapa papan proyek dengan latar belakang gradien yang dinamis.
+- Kolom dan Kartu Kustom: Menambahkan kolom alur kerja (seperti Todo, In Progress, Done) dan menaruh kartu tugas di dalamnya.
+- Detail Tugas Lanjutan: Mengatur tingkat prioritas (low, medium, high), menambahkan deskripsi, menyertakan tautan referensi, serta menetapkan tanggal jatuh tempo.
+- Sistem Catatan Terintegrasi: Membuat catatan berbasis Markdown dan menandai catatan favorit untuk akses cepat.
+- Manajemen Autentikasi dan Profil: Pendaftaran dan login pengguna aman yang dikelola melalui Supabase Auth, serta pengaturan peran pengguna (user/admin).
+
+## Teknologi yang Digunakan
+
+- Frontend Framework: SvelteKit (Svelte 5)
+- Styling: Tailwind CSS
+- Database & Auth: Supabase
+- Icons: Lucide Svelte
+- Parser Markdown: Marked
+
+## Persyaratan Sistem
+
+- Node.js versi 18 atau lebih baru
+- Akun Supabase (untuk database dan autentikasi)
+
+## Langkah Setup
+
+### 1. Klon Repositori
 
 ```sh
-# create a new project
-npx sv create my-app
+git clone https://github.com/DeskaArya/KanBoard.git
+cd KanBoard
 ```
 
-To recreate this project with the same configuration:
+### 2. Instal Dependensi
 
 ```sh
-# recreate this project
-npx sv@0.15.3 create --template minimal --types ts --install npm KanBoard
+npm install
 ```
 
-## Developing
+### 3. Konfigurasi Variabel Lingkungan (Environment Variables)
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Buat file bernama `.env` di direktori utama proyek dan tambahkan kredensial Supabase Anda:
+
+```env
+PUBLIC_SUPABASE_URL=https://your-supabase-project.supabase.co
+PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-key
+```
+
+### 4. Skema Database (Supabase SQL)
+
+Jalankan perintah SQL berikut di SQL Editor Supabase Anda untuk membuat tabel-tabel yang diperlukan:
+
+```sql
+-- Tabel Profil Pengguna
+create table profiles (
+  id uuid references auth.users on delete cascade primary key,
+  username text unique not null,
+  full_name text,
+  avatar_url text,
+  role text check (role in ('user', 'admin')) default 'user' not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Tabel Board
+create table boards (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references profiles(id) on delete cascade not null,
+  title text not null,
+  description text,
+  background_gradient text default 'from-blue-500 to-indigo-600' not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Tabel Column
+create table columns (
+  id uuid default gen_random_uuid() primary key,
+  board_id uuid references boards(id) on delete cascade not null,
+  title text not null,
+  position integer not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Tabel Card
+create table cards (
+  id uuid default gen_random_uuid() primary key,
+  column_id uuid references columns(id) on delete cascade not null,
+  board_id uuid references boards(id) on delete cascade not null,
+  title text not null,
+  description text,
+  position integer not null,
+  priority text check (priority in ('low', 'medium', 'high')) default 'medium' not null,
+  due_date timestamp with time zone,
+  link text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Tabel Note
+create table notes (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references profiles(id) on delete cascade not null,
+  card_id uuid references cards(id) on delete set null,
+  title text not null,
+  content text,
+  is_favorite boolean default false not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+```
+
+Pastikan juga untuk mengaktifkan Row Level Security (RLS) di Supabase atau mengatur kebijakan akses (policies) sesuai kebutuhan aplikasi Anda agar data pengguna aman.
+
+## Menjalankan Proyek
+
+### Mode Pengembangan (Development)
+
+Untuk menjalankan server pengembangan lokal:
 
 ```sh
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+Buka browser Anda dan akses `http://localhost:5173`.
 
-To create a production version of your app:
+### Membangun untuk Produksi (Production Build)
+
+Untuk membuat build produksi aplikasi:
 
 ```sh
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+Anda dapat menguji hasil build produksi secara lokal dengan perintah:
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```sh
+npm run preview
+```
